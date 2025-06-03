@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id_usuario   String  @id @default(uuid())
+  nome_usuario String
+  login        String  @unique
+  senha        String
+  tipo_usuario String  @db.Char(1)
+  ativo        Boolean @default(true)
+
+  atendimentos Atendimento[]
+}
+
+model Cliente {
+  id_cliente      String   @id @default(uuid())
+  nome_cliente    String
+  cpf             String   @unique
+  data_nascimento DateTime
+  telefone        String
+
+  atendimentos Atendimento[]
+}
+
+model Responsavel {
+  id_responsavel   String @id @default(uuid())
+  nome_responsavel String
+  telefone         String
+}
+
+model TipoAtendimento {
+  id_tipo_atendimento   String @id @default(uuid())
+  nome_tipo_atendimento String
+
+  atendimentos Atendimento[]
+}
+
+model Clinica {
+  id_clinica           String @id @default(uuid())
+  nome_clinica         String
+  taxa_repasse_clinica Float
+  telefone_clinica     String
+  nome_responsavel     String
+  email_clinica        String @unique
+
+  atendimentos Atendimento[]
+}
+
+model Convenio {
+  id_convenio            String @id @default(uuid())
+  nome_convenio          String
+  valor_coparticipacao   Float
+  telefone_convenio      String
+  nome_contato_convenio  String
+  email_contato_convenio String @unique
+
+  atendimentos Atendimento[]
+}
+
+model Procedimento {
+  id_procedimento   String @id @default(uuid())
+  nome_procedimento String
+
+  atendimentos Atendimento[]
+}
+
+model Atendimento {
+  id_atendimento      String   @id @default(uuid())
+  id_cliente          String
+  id_convenio         String
+  id_procedimento     String
+  id_clinica          String
+  id_tipo_atendimento String
+  id_usuario          String
+  valor_bruto         Float
+  observacao          String?
+  data_atendimento    DateTime
+
+  cliente         Cliente         @relation(fields: [id_cliente], references: [id_cliente])
+  convenio        Convenio        @relation(fields: [id_convenio], references: [id_convenio])
+  procedimento    Procedimento    @relation(fields: [id_procedimento], references: [id_procedimento])
+  clinica         Clinica         @relation(fields: [id_clinica], references: [id_clinica])
+  tipoAtendimento TipoAtendimento @relation(fields: [id_tipo_atendimento], references: [id_tipo_atendimento])
+  usuario         Usuario         @relation(fields: [id_usuario], references: [id_usuario])
+}

@@ -1,0 +1,22 @@
+# Node
+node_modules/
+dist/
+.env
+
+# Prisma
+prisma/dev.db
+prisma/migrations/
+
+# Docker
+*.log
+docker-data/
+
+# VSCode
+.vscode/
+
+# Coverage (testes)
+coverage/
+
+# Sistema
+.DS_Store
+Thumbs.db
