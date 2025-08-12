@@ -18,7 +18,7 @@ model Usuario {
   nome_usuario String
   login        String  @unique
   senha        String
-  tipo_usuario String  @db.Char(1)
+  email        String  @unique
   ativo        Boolean @default(true)
 
   atendimentos Atendimento[]

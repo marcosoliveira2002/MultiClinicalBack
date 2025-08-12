@@ -21,4 +21,54 @@ export class UsuarioController {
       return res.status(err.status || 500).json({ message: err.message || 'Erro interno', details: err.issues });
     }
   };
+  async me(req: Request, res: Response) {
+    try {
+      const userFromToken = (req as any).user as { sub: string; login: string };
+      const me = await usuarioService.me(userFromToken.sub);
+
+      if (!me) return res.status(404).json({ message: 'Usuário não encontrado' });
+
+      return res.json({
+        message: 'Usuário autenticado',
+        usuario: { id: me.id_usuario, nome: me.nome_usuario, email: me.email }
+      });
+    } catch (err: any) {
+      return res.status(500).json({ message: 'Erro interno' });
+    }
+  }
+  listar = async (req: Request, res: Response) => {
+    try {
+      const usuarios = await usuarioService.listar();
+      return res.json(usuarios);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: 'Erro ao buscar usuários' });
+    }
+  };
+
+  buscarPorId = async (req: Request, res: Response) => {
+    try {
+      const usuario = await usuarioService.obterPorId(req.params.id);
+      return res.json(usuario);
+    } catch (err: any) {
+      return res.status(err.status || 500).json({
+        message: err.message || 'Erro interno',
+        details: err.issues
+      });
+    }
+  };
+  
+  atualizar = async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const result = await usuarioService.atualizar(id, req.body);
+      return res.json(result);
+    } catch (err: any) {
+      return res.status(err.status || 500).json({
+        message: err.message || 'Erro interno',
+        details: err.issues
+      });
+    }
+  };
 }
+
