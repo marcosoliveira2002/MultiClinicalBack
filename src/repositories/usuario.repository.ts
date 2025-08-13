@@ -70,4 +70,12 @@ export class UsuarioRepository {
     });
   }
 
+
+  async atualizarSenha(userId: string, senhaHash: string) {
+    return prisma.usuario.update({
+      where: { id_usuario: userId },
+      data: { senha: senhaHash }
+    });
+  }
+
 }

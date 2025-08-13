@@ -14,14 +14,28 @@ datasource db {
 }
 
 model Usuario {
-  id_usuario   String  @id @default(uuid())
-  nome_usuario String
-  login        String  @unique
-  senha        String
-  email        String  @unique
-  ativo        Boolean @default(true)
+  id_usuario    String          @id @default(uuid())
+  nome_usuario  String
+  login         String          @unique
+  senha         String
+  email         String          @unique
+  ativo         Boolean         @default(true)
+  atendimentos  Atendimento[]
+  PasswordReset PasswordReset[]
+}
 
-  atendimentos Atendimento[]
+model PasswordReset {
+  id         String   @id @default(uuid())
+  user_id    String
+  token_hash String // hash do token
+  expires_at DateTime
+  used       Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  user Usuario @relation(fields: [user_id], references: [id_usuario], onDelete: Cascade)
+
+  @@index([user_id, expires_at, used])
+  @@index([token_hash, used])
 }
 
 model Cliente {

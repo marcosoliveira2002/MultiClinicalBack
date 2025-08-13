@@ -5,6 +5,8 @@ type PublicRoute = { method: string; path: RegExp };
 
 const publicRoutes: PublicRoute[] = [
   { method: 'POST', path: /^\/usuarios\/login$/ },
+  { method: 'POST', path: /^\/usuarios\/forgot-password$/ },
+  { method: 'POST', path: /^\/usuarios\/reset-password$/ },
   { method: 'POST', path: /^\/usuarios$/ },       // cadastro
   { method: 'OPTIONS', path: /^\/.*$/ },          // preflight CORS
   { method: 'GET', path: /^\/health$/ },          // se tiver health

@@ -27,7 +27,7 @@ async function main() {
       nome_usuario: nomeAdmin,
       login: loginAdmin,
       senha: senhaHash,
-      tipo_usuario: 'A', // A para Administrador
+      email: 'dev6@aproms.com', // A para Administrador
       ativo: true,
     },
   });

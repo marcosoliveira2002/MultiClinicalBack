@@ -1,7 +1,10 @@
 import { UsuarioRepository } from '../repositories/usuario.repository';
 import { z } from 'zod';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import { signToken } from '../config/jwt';
+import { PasswordResetRepository } from '@/repositories/passwordReset.repository';
+import { sendPasswordResetEmail } from '@/infra/mailer';
 
 const idSchema = z.string().uuid('ID de usuário inválido');
 
@@ -11,6 +14,16 @@ const usuarioSchema = z.object({
   senha: z.string().min(6),
   email: z.string().email(),
   ativo: z.boolean().default(true),
+});
+
+const forgotSchema = z.object({
+  login: z.string().min(1).optional(),
+  email: z.string().email().optional()
+}).refine(d => !!d.login || !!d.email, { message: 'Envie login ou email' });
+
+const resetSchema = z.object({
+  token: z.string().min(1),
+  novaSenha: z.string().min(6)
 });
 
 const loginSchema = z.object({
@@ -30,7 +43,7 @@ const atualizarSchema = z.object({
 
 export class UsuarioService {
   private repo = new UsuarioRepository();
-
+  private resetRepo = new PasswordResetRepository();
   async criar(data: any) {
     const parsed = usuarioSchema.safeParse(data);
     if (!parsed.success) {
@@ -122,7 +135,7 @@ export class UsuarioService {
 
     return usuario;
   }
-    async atualizar(id: string, data: any) {
+  async atualizar(id: string, data: any) {
     const idParsed = idSchema.safeParse(id);
     if (!idParsed.success) {
       throw { status: 400, message: "Dados inválidos", issues: idParsed.error.format() };
@@ -171,5 +184,79 @@ export class UsuarioService {
         ativo: atualizado.ativo
       }
     };
+
+  }
+  async forgotPassword(data: any) {
+    const parsed = forgotSchema.safeParse(data);
+    if (!parsed.success) {
+      // ainda assim, retornaremos 200 no controller para não vazar info; mas aqui deixo consistente
+      throw { status: 400, message: 'Dados inválidos', issues: parsed.error.format() };
+    }
+
+    const { login, email } = parsed.data;
+
+    // Tenta achar o usuário (se não achar, NÃO falamos isso pra fora)
+    let usuario = null;
+    if (email) {
+      usuario = await this.repo.buscarPorEmail(email.trim().toLowerCase());
+    } else if (login) {
+      usuario = await this.repo.buscarPorLogin(login.trim().toLowerCase());
+    }
+
+    if (usuario) {
+      // Invalida tokens antigos
+      await this.resetRepo.invalidarTokensAtivosDoUsuario(usuario.id_usuario);
+
+      // Gera token aleatório e guarda HASH no banco
+      const tokenRaw = crypto.randomBytes(32).toString('hex'); // token que vai por e-mail
+      const tokenHash = crypto.createHash('sha256').update(tokenRaw).digest('hex');
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+
+      await this.resetRepo.criarToken(usuario.id_usuario, tokenHash, expiresAt);
+
+      // Envie o e-mail com o tokenRaw (não o hash)
+      // Exemplo de link: https://seuapp.com/reset?token=<tokenRaw>
+      // Aqui você pode usar nodemailer; vou deixar um stub:
+      const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset?token=${tokenRaw}`;
+      try {
+        await sendPasswordResetEmail(usuario.email, resetUrl);
+      } catch (e) {
+        // Não vaza erro pro cliente (para não revelar existência de conta)
+        console.error('[ForgotPassword] Falha ao enviar e-mail:', e);
+      }
+    }
+
+    // Resposta genérica SEMPRE
+    return {
+      message: 'Se existir uma conta com esses dados, você receberá instruções no e-mail em instantes.'
+    };
+  }
+
+  async resetPassword(data: any) {
+    const parsed = resetSchema.safeParse(data);
+    if (!parsed.success) {
+      throw { status: 400, message: 'Dados inválidos', issues: parsed.error.format() };
+    }
+
+    const { token, novaSenha } = parsed.data;
+
+    // Compara por HASH (nunca salve token em plain text)
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    const registro = await this.resetRepo.obterTokenValidoPorHash(tokenHash);
+    if (!registro) {
+      // Mensagem genérica (token inválido ou expirado)
+      throw { status: 400, message: 'Token inválido ou expirado' };
+    }
+
+    // Atualiza a senha do usuário
+    const senhaHash = await bcrypt.hash(novaSenha, 10);
+    await this.repo.atualizarSenha(registro.user_id, senhaHash);
+
+    // Invalida esse token e quaisquer outros ativos
+    await this.resetRepo.marcarComoUsado(registro.id);
+    await this.resetRepo.marcarTodosDoUsuarioComoUsados(registro.user_id);
+
+    return { message: 'Senha redefinida com sucesso' };
   }
 }
