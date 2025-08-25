@@ -55,39 +55,51 @@ model Responsavel {
 }
 
 model TipoAtendimento {
-  id_tipo_atendimento   String @id @default(uuid())
+  id_tipo_atendimento   String  @id @default(uuid())
   nome_tipo_atendimento String
+  status_atividade      Boolean @default(true)
 
   atendimentos Atendimento[]
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
 }
 
 model Clinica {
-  id_clinica           String @id @default(uuid())
+  id_clinica           String  @id @default(uuid())
   nome_clinica         String
   taxa_repasse_clinica Float
   telefone_clinica     String
   nome_responsavel     String
-  email_clinica        String @unique
+  email_clinica        String  @unique
+  status_atividade     Boolean @default(true)
 
   atendimentos Atendimento[]
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
 }
 
 model Convenio {
-  id_convenio            String @id @default(uuid())
+  id_convenio            String  @id @default(uuid())
   nome_convenio          String
   valor_coparticipacao   Float
   telefone_convenio      String
   nome_contato_convenio  String
-  email_contato_convenio String @unique
+  email_contato_convenio String  @unique
+  status_atividade       Boolean @default(true)
 
   atendimentos Atendimento[]
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
 }
 
 model Procedimento {
-  id_procedimento   String @id @default(uuid())
+  id_procedimento   String  @id @default(uuid())
   nome_procedimento String
+  status_atividade  Boolean @default(true)
 
   atendimentos Atendimento[]
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
 }
 
 model Atendimento {
