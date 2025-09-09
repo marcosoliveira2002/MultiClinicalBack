@@ -39,13 +39,16 @@ model PasswordReset {
 }
 
 model Cliente {
-  id_cliente      String   @id @default(uuid())
-  nome_cliente    String
-  cpf             String   @unique
-  data_nascimento DateTime
-  telefone        String
+  id_cliente       String    @id @default(uuid())
+  nome_cliente     String
+  cpf              String    @unique
+  data_nascimento  DateTime?
+  telefone         String?
+  status_atividade Boolean   @default(true)
 
   atendimentos Atendimento[]
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
 }
 
 model Responsavel {
@@ -111,6 +114,7 @@ model Atendimento {
   id_tipo_atendimento String
   id_usuario          String
   valor_bruto         Float
+  desconto            Float    @default(0)
   observacao          String?
   data_atendimento    DateTime
 
@@ -120,4 +124,7 @@ model Atendimento {
   clinica         Clinica         @relation(fields: [id_clinica], references: [id_clinica])
   tipoAtendimento TipoAtendimento @relation(fields: [id_tipo_atendimento], references: [id_tipo_atendimento])
   usuario         Usuario         @relation(fields: [id_usuario], references: [id_usuario])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }

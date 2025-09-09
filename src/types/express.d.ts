@@ -1,12 +1,18 @@
-import 'express';
+import "express";
 
-declare module 'express-serve-static-core' {
-  interface Request {
-    user?: {
-      sub: string;   // id do usuário
-      login: string;
-      iat?: number;
-      exp?: number;
-    };
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id_usuario?: string;
+        email?: string;
+        sub?: string;
+        login?: string;
+        iat?: number;
+        exp?: number;
+      };
+    }
   }
 }
+
+export {};
