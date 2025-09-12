@@ -9,14 +9,31 @@ function digits(v: string) { return v.replace(/\D/g, ""); }
 
 
 export class ClienteService {
-  async create(data: CreateClienteDTO) {
-    // normaliza CPF sem máscara
+ async create(data: CreateClienteDTO) {
     const cpf = digits(data.cpf);
     const existe = await repo.findByCpf(cpf);
     if (existe) throw new Error("Já existe um cliente com esse CPF.");
-    return repo.create({ ...data, cpf });
-  }
 
+    // monta payload base sem campos do responsável (pois não existem em Cliente)
+    const { responsavel_nome, responsavel_telefone, ...clienteSemResp } = data;
+
+    // se vierem os dois campos, cria nested Responsavel e vincula
+    if (responsavel_nome && responsavel_telefone) {
+      return repo.create({
+        ...clienteSemResp,
+        cpf,
+        responsavel: {
+          create: {
+            nome_responsavel: responsavel_nome,
+            telefone: responsavel_telefone,
+          },
+        },
+      });
+    }
+
+    // sem responsável → cria só o cliente
+    return repo.create({ ...clienteSemResp, cpf });
+  }
 
   async update(id: string, data: UpdateClienteDTO) {
     const payload: any = { ...data };

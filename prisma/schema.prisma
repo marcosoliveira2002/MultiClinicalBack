@@ -38,23 +38,27 @@ model PasswordReset {
   @@index([token_hash, used])
 }
 
-model Cliente {
-  id_cliente       String    @id @default(uuid())
-  nome_cliente     String
-  cpf              String    @unique
-  data_nascimento  DateTime?
-  telefone         String?
-  status_atividade Boolean   @default(true)
-
-  atendimentos Atendimento[]
-  created_at   DateTime      @default(now())
-  updated_at   DateTime      @updatedAt
-}
-
 model Responsavel {
   id_responsavel   String @id @default(uuid())
   nome_responsavel String
   telefone         String
+}
+
+model Cliente {
+  id_cliente       String   @id @default(uuid())
+  nome_cliente     String
+  cpf              String   @unique
+  data_nascimento  DateTime?
+  telefone         String?
+  status_atividade Boolean  @default(true)
+
+  // relação 1:1 opcional com Responsavel
+  id_responsavel   String?  @unique
+  responsavel      Responsavel? @relation(fields: [id_responsavel], references: [id_responsavel])
+
+  atendimentos     Atendimento[]
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 }
 
 model TipoAtendimento {

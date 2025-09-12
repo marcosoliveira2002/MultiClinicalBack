@@ -3,7 +3,12 @@ const prisma = new PrismaClient();
 
 
 export class ClienteRepository {
-create(data: any) { return prisma.cliente.create({ data }); }
+  create(data: any) {
+    return prisma.cliente.create({
+      data,
+      include: { responsavel: true }, // <- incluir no retorno
+    });
+  }
 
 update(id: string, data: any) { return prisma.cliente.update({ where: { id_cliente: id }, data }); }
 
