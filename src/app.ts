@@ -10,7 +10,10 @@ import clinicaRoutes from './routes/clinica.routes';
 import convenioRoutes from './routes/convenio.routes';
 import procedimentoRoutes from './routes/procedimento.routes';
 import atendimentoRoutes from './routes/atendimento.routes';
+import dashboardRoutes from "./routes/dashboard.routes";
+import relatoriosRoutes from "@/routes/relatorios.routes";
 import { authUnless } from './middlewares/authUnless';
+
 
 const app = express();
 
@@ -36,7 +39,7 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
-app.options('*', cors()); 
+app.options('*', cors());
 
 app.use(express.json());
 
@@ -52,7 +55,6 @@ app.use('/clinicas', clinicaRoutes);
 app.use('/convenios', convenioRoutes);
 app.use('/procedimentos', procedimentoRoutes);
 app.use('/atendimentos', atendimentoRoutes);
-
-
-
+app.use(dashboardRoutes);
+app.use(relatoriosRoutes);
 export default app;

@@ -42,23 +42,26 @@ model Responsavel {
   id_responsavel   String @id @default(uuid())
   nome_responsavel String
   telefone         String
+
+  // lado oposto da 1:1
+  cliente Cliente? @relation(name: "ClienteResponsavel")
 }
 
 model Cliente {
-  id_cliente       String   @id @default(uuid())
+  id_cliente       String    @id @default(uuid())
   nome_cliente     String
-  cpf              String   @unique
+  cpf              String    @unique
   data_nascimento  DateTime?
   telefone         String?
-  status_atividade Boolean  @default(true)
+  status_atividade Boolean   @default(true)
 
-  // relação 1:1 opcional com Responsavel
-  id_responsavel   String?  @unique
-  responsavel      Responsavel? @relation(fields: [id_responsavel], references: [id_responsavel])
+  // 1:1 opcional com Responsavel (chave única garante 1:1)
+  id_responsavel String?      @unique
+  responsavel    Responsavel? @relation(name: "ClienteResponsavel", fields: [id_responsavel], references: [id_responsavel])
 
-  atendimentos     Atendimento[]
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
+  atendimentos Atendimento[]
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
 }
 
 model TipoAtendimento {
