@@ -189,13 +189,13 @@ export class UsuarioService {
   async forgotPassword(data: any) {
     const parsed = forgotSchema.safeParse(data);
     if (!parsed.success) {
-      // ainda assim, retornaremos 200 no controller para não vazar info; mas aqui deixo consistente
+
       throw { status: 400, message: 'Dados inválidos', issues: parsed.error.format() };
     }
 
     const { login, email } = parsed.data;
 
-    // Tenta achar o usuário (se não achar, NÃO falamos isso pra fora)
+
     let usuario = null;
     if (email) {
       usuario = await this.repo.buscarPorEmail(email.trim().toLowerCase());

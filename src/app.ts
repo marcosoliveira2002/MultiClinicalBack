@@ -13,7 +13,7 @@ import atendimentoRoutes from './routes/atendimento.routes';
 import dashboardRoutes from "./routes/dashboard.routes";
 import relatoriosRoutes from "@/routes/relatorios.routes";
 import { authUnless } from './middlewares/authUnless';
-
+import { Responsavel } from '@prisma/client';
 
 const app = express();
 
@@ -57,4 +57,6 @@ app.use('/procedimentos', procedimentoRoutes);
 app.use('/atendimentos', atendimentoRoutes);
 app.use(dashboardRoutes);
 app.use(relatoriosRoutes);
+
+app.use("/responsaveis", responsavelRoutes);
 export default app;

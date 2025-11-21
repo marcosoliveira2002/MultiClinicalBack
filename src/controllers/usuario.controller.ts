@@ -74,10 +74,8 @@ export class UsuarioController {
   forgotPassword = async (req: Request, res: Response) => {
     try {
       const result = await usuarioService.forgotPassword(req.body);
-      // Sempre 200, resposta genérica
       return res.json(result);
     } catch (err: any) {
-      // Mesmo em erro de validação, pode retornar 200 genérico para não permitir enumeração
       if (err.status === 400) {
         return res.json({
           message: 'Se existir uma conta com esses dados, você receberá instruções no e-mail em instantes.'

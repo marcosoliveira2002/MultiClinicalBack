@@ -43,7 +43,6 @@ model Responsavel {
   nome_responsavel String
   telefone         String
 
-  // lado oposto da 1:1
   cliente Cliente? @relation(name: "ClienteResponsavel")
 }
 
@@ -57,7 +56,7 @@ model Cliente {
 
   // 1:1 opcional com Responsavel (chave única garante 1:1)
   id_responsavel String?      @unique
-  responsavel    Responsavel? @relation(name: "ClienteResponsavel", fields: [id_responsavel], references: [id_responsavel])
+  responsavel    Responsavel? @relation(name: "ClienteResponsavel", fields: [id_responsavel], references: [id_responsavel], onDelete: SetNull)
 
   atendimentos Atendimento[]
   created_at   DateTime      @default(now())
